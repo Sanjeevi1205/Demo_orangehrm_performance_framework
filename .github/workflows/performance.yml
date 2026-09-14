@@ -1,0 +1,34 @@
+name: K6 Performance Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Create Reports Folder
+        run: mkdir -p reports
+
+      - name: Run Login API Test
+        run: |
+          k6 run tests/login_api.js \
+          --summary-export=reports/login_report.json
+
+      - name: Run Create Employee API Test
+        run: |
+          k6 run tests/create_employee_api.js \
+          --summary-export=reports/create_employee_report.json
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-reports
+          path: reports/
